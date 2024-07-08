@@ -7,6 +7,7 @@ const TestModel = require("../models/Tests.model");
 const LoginStudent = async (req, res) => {
   const { username, password } = req.body;
 
+  console.log(username, password);
   if (!username || !password) {
     return res
       .status(400)
