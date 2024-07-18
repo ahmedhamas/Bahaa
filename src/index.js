@@ -26,10 +26,12 @@ app.use(
 const UserRouter = require("./router/User.router");
 const HomeworkRouter = require("./router/Homework.router");
 const TestRouter = require("./router/Test.router");
+const TeacherRouter = require("./router/Teacher.router");
 
 app.use("/api", UserRouter);
 app.use("/api/homework", HomeworkRouter);
 app.use("/api/test", TestRouter);
+app.use("/api/teacher", TeacherRouter);
 
 app.use((req, res, next) => {
   if (req.url.includes("api")) {
@@ -40,18 +42,3 @@ app.use((req, res, next) => {
 });
 
 app.listen(port, () => console.log(`http://localhost:${port}`));
-
-//TODO: Add user blocking method
-//TODO: Add auto correction for the test and home work for user but not public
-//TODO: Add admin can publish test and home work
-//TODO: Add admin can publich the user results on test and homework
-//TODO: Add certificates
-//TODO: Make test table for public test
-//TODO: Make qr code for public test urls auto generated
-//TODO: Add button to send the user test results to the user parrent whatsapp number
-//TODO: Add admin can publish images as it's the question and can add text above the image
-//TODO: Add list of animation for the quistions if the admin want to add it
-//TODO: Add Timer for the test
-//TODO: Get the qustions randomly and not in order
-//TODO: Add auto correction for the test
-//TODO: make certificates for the tests that user passed

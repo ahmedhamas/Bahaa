@@ -47,6 +47,7 @@ const AutoCorrector = (answers, userAnswers) => {
 
     if (
       answer.choice !== undefined &&
+      question &&
       answer.choice === question.choice &&
       answer.isRight === 1
     ) {
@@ -54,7 +55,11 @@ const AutoCorrector = (answers, userAnswers) => {
       question.isRight = true;
     }
 
-    if (answer.text_answer !== undefined) {
+    if (
+      answer.text_answer !== undefined &&
+      question &&
+      question.text_answer !== undefined
+    ) {
       question.text_answer.forEach((questionAnswer) => {
         const textAnswers = answer.text_answer.find(
           (textAnswer) => textAnswer === questionAnswer
@@ -74,4 +79,5 @@ module.exports = {
   shuffleArray,
   GetAnswersFromArray,
   AutoCorrector,
+  calculatePercentage,
 };

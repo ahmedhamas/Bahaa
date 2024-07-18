@@ -148,6 +148,7 @@ const SubmitTest = async (req, res) => {
             question: answer.question_id,
             answer: answer.choice,
             isRight: answer.isRight,
+            id: id,
           }).AddUserAnswer(true);
         }
 
@@ -158,6 +159,7 @@ const SubmitTest = async (req, res) => {
               question: answer.question_id,
               answer: textAnswer,
               isRight: answer.isRight,
+              id: id,
             }).AddUserAnswer();
           }
         }
