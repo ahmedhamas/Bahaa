@@ -24,7 +24,7 @@ const LoginStudent = async (req, res) => {
       username,
       password: hashedPassword,
     }).Login();
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId }, "BAHAA:AL:KENDY", {
       expiresIn: "80y",
     });
     res.cookie("token", token, {

@@ -8,7 +8,7 @@ const ValidateUser = (req, res, next) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const id = jwt.verify(userId, process.env.JWT_SECRET);
+    const id = jwt.verify(userId, "BAHAA:AL:KENDY");
 
     req.headers["user-id"] = id;
 
@@ -27,7 +27,7 @@ const ValidateTeacher = (req, res, next) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const id = jwt.verify(userId, process.env.JWT_SECRET);
+    const id = jwt.verify(userId, "BAHAA:AL:KENDY");
 
     req.headers["user-id"] = id;
 

@@ -20,7 +20,7 @@ const TeacherLogin = async (req, res) => {
       password: hashedPassword,
     }).Login();
 
-    const token = jwt.sign({ userId: userId.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: userId.id }, "BAHAA:AL:KENDY", {
       expiresIn: "80y",
     });
 
