@@ -109,13 +109,14 @@ module.exports = class UserModel {
 
   GetAll() {
     const { user } = this;
-    const offSet = user.limit - 30;
     const sql = `SELECT User.BlockReason, User.parent_phone, Grade.grade_name, User.isBlocked, User.id, User.username FROM User INNER JOIN Grade ON User.grade_id = Grade.id ${
       user.grade !== "all" ? "WHERE User.grade_id =" + user.grade : ""
     } LIMIT ? OFFSET ?`;
 
+    console.log(sql);
+
     return new Promise((resolve, reject) => {
-      db.all(sql, [user.limit, offSet], (err, rows) => {
+      db.all(sql, [user.limit, user.offset], (err, rows) => {
         if (err) {
           reject(err);
         } else {
@@ -165,6 +166,28 @@ module.exports = class UserModel {
       db.run(sql, [user.id], (err) => {
         if (err) reject(err);
         resolve();
+      });
+    });
+  }
+
+  GetStudents() {
+    const { user } = this;
+    const Table =
+      user.type === "test" ? "UserTestResult" : "UserHomeworkResult";
+    const sql = `SELECT ${Table}.id, ${Table}.${
+      user.type === "test" ? "test_id" : "homework_id"
+    }, ${user.type === "test" ? "Tests" : "Homework"}.${
+      user.type === "test" ? "test_name" : "homework_name"
+    }, ${Table}.public, ${Table}.result, User.username, ${Table}.user_id FROM ${Table} INNER JOIN User ON User.id = ${Table}.user_id INNER JOIN ${
+      user.type === "test" ? "Tests" : "Homework"
+    } ON ${user.type === "test" ? "Tests" : "Homework"}.id = ${Table}.${
+      user.type === "test" ? "test_id" : "homework_id"
+    } WHERE ${Table}.${user.type === "test" ? "test_id" : "homework_id"} = ?`;
+
+    return new Promise((resolve, reject) => {
+      db.all(sql, [user.test], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
       });
     });
   }

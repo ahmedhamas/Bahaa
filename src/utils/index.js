@@ -7,6 +7,7 @@ const shuffleArray = (arr) => {
 
 const GetAnswersFromArray = (answers, isChoices) => {
   const answersArray = [];
+
   for (let i = 0; i < answers.length; i++) {
     const answer = answers[i];
     if (isChoices) {
@@ -29,8 +30,8 @@ function calculatePercentage(X, Y) {
 }
 
 const AutoCorrector = (answers, userAnswers) => {
-  let totalOfCorrect = 1;
-  let totalOfCorrectAnswers = 1;
+  let totalOfCorrect = 0;
+  let totalOfCorrectAnswers = 0;
 
   answers.forEach((answer, anIndex) => {
     if (answer.choice !== undefined) {

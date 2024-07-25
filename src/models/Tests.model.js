@@ -5,6 +5,67 @@ module.exports = class TestModel {
     this.test = test;
   }
 
+  static Count() {
+    const sql = "SELECT COUNT(*) AS count FROM Tests";
+    return new Promise((resolve, reject) => {
+      db.get(sql, [], (err, row) => {
+        if (err) reject(err);
+        resolve(row);
+      });
+    });
+  }
+
+  Create() {
+    const { test } = this;
+    const sql =
+      "INSERT INTO Tests (test_name, grade_id, created_at, expire_date, term_id) VALUES (?, ?, ?, ?, ?)";
+    return new Promise((resolve, reject) => {
+      db.run(
+        sql,
+        [
+          test.test_name,
+          test.grade_id,
+          test.created_at,
+          test.expire_date,
+          test.term_id,
+        ],
+        function (err) {
+          if (err) reject(err);
+          resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  Delete() {
+    const { test } = this;
+    const sql = "DELETE FROM Tests WHERE id = ?";
+    return new Promise((resolve, reject) => {
+      db.run(sql, [test.id], function (err) {
+        if (err) reject(err);
+        resolve(this.lastID);
+      });
+    });
+  }
+
+  GetAll() {
+    const { test } = this;
+    let sql =
+      "SELECT Tests.id, Tests.test_name, Grade.grade_name, Tests.created_at, Tests.expire_date, Tests.term_id FROM Tests INNER JOIN Grade ON Tests.grade_id = Grade.id";
+    if (test.grade || test.grade !== 0) {
+      sql += ` WHERE Tests.grade_id = ${test.grade} ORDER BY Tests.created_at DESC LIMIT ${test.limit} OFFSET ${test.offset}`;
+    } else {
+      sql += ` ORDER BY Tests.created_at DESC LIMIT ${test.limit} OFFSET ${test.offset}`;
+    }
+
+    return new Promise((resolve, reject) => {
+      db.all(sql, (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  }
+
   GetResults() {
     const { test } = this;
 
@@ -130,6 +191,19 @@ module.exports = class TestModel {
       db.get(sql, [test.id], (err, row) => {
         if (err) reject(err);
         resolve(row);
+      });
+    });
+  }
+
+  GetTestQustions() {
+    const { test } = this;
+    const sql =
+      "SELECT Questions.id, Questions.question, QuestionChoices.is_right_choice, QuestionChoices.the_choice, QuestionTextAnswers.the_answer FROM Questions LEFT JOIN QuestionChoices ON Questions.id = QuestionChoices.question_id LEFT JOIN QuestionTextAnswers ON Questions.id = QuestionTextAnswers.question_id WHERE Questions.test_id = ?";
+
+    return new Promise((resolve, reject) => {
+      db.all(sql, [test.id], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
       });
     });
   }

@@ -26,12 +26,16 @@ app.use(
 const UserRouter = require("./router/User.router");
 const HomeworkRouter = require("./router/Homework.router");
 const TestRouter = require("./router/Test.router");
+const PublicTestRouter = require("./router/PublicTest.router");
 const TeacherRouter = require("./router/Teacher.router");
+const GradeRouter = require("./router/Grade.router");
 
 app.use("/api", UserRouter);
 app.use("/api/homework", HomeworkRouter);
 app.use("/api/test", TestRouter);
+app.use("/api/publictest", PublicTestRouter);
 app.use("/api/teacher", TeacherRouter);
+app.use("/api/grade", GradeRouter);
 
 app.use((req, res, next) => {
   if (req.url.includes("api")) {

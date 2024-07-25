@@ -5,6 +5,66 @@ module.exports = class HomeworkModel {
     this.homework = homework;
   }
 
+  static Count() {
+    const sql = "SELECT COUNT(*) AS count FROM Homework";
+    return new Promise((resolve, reject) => {
+      db.get(sql, [], (err, row) => {
+        if (err) reject(err);
+        resolve(row);
+      });
+    });
+  }
+
+  Create() {
+    const { homework } = this;
+    const sql =
+      "INSERT INTO Homework (homework_name, grade_id, created_at, term_id) VALUES (?, ?, ?, ?)";
+    return new Promise((resolve, reject) => {
+      db.run(
+        sql,
+        [
+          homework.homework_name,
+          homework.grade_id,
+          homework.created_at,
+          homework.term_id,
+        ],
+        function (err) {
+          if (err) reject(err);
+          resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  Delete() {
+    const { homework } = this;
+    const sql = "DELETE FROM Homework WHERE id = ?";
+    return new Promise((resolve, reject) => {
+      db.run(sql, [homework.id], function (err) {
+        if (err) reject(err);
+        resolve(this.lastID);
+      });
+    });
+  }
+
+  GetAll() {
+    const { homework } = this;
+    console.log(homework);
+    let sql = `SELECT Homework.id, Homework.homework_name, Grade.grade_name, Homework.created_at, Homework.term_id FROM Homework INNER JOIN Grade ON Homework.grade_id = Grade.id`;
+    if (homework.grade || homework.grade !== 0) {
+      sql += ` WHERE Homework.grade_id = ${homework.grade} ORDER BY Homework.created_at DESC LIMIT ${homework.limit} OFFSET ${homework.offset}`;
+    } else {
+      sql += ` ORDER BY Homework.created_at DESC LIMIT ${homework.limit} OFFSET ${homework.offset}`;
+    }
+
+    return new Promise((resolve, reject) => {
+      db.all(sql, (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  }
+
   GetResults() {
     const { homework } = this;
 
@@ -141,6 +201,19 @@ module.exports = class HomeworkModel {
       db.get(sql, [homework.id], (err, row) => {
         if (err) reject(err);
         resolve(row);
+      });
+    });
+  }
+
+  GetTestQustions() {
+    const { homework } = this;
+    const sql =
+      "SELECT Questions.id, Questions.question, QuestionChoices.is_right_choice, QuestionChoices.the_choice, QuestionTextAnswers.the_answer FROM Questions LEFT JOIN QuestionChoices ON Questions.id = QuestionChoices.question_id LEFT JOIN QuestionTextAnswers ON Questions.id = QuestionTextAnswers.question_id WHERE Questions.homework_id = ?";
+
+    return new Promise((resolve, reject) => {
+      db.all(sql, [homework.id], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
       });
     });
   }

@@ -100,7 +100,7 @@ const GetAll = async (req, res) => {
   const page = JSON.parse(req.params.page);
   const grade = req.params.grade;
   try {
-    let pageLimit = 30 / page;
+    let pageLimit = 30;
     const user = await new TeacherModel({ id: tokenData.userId }).Get();
 
     if (!user) {
@@ -111,7 +111,11 @@ const GetAll = async (req, res) => {
 
     const pageNumbers = Math.ceil(studentCount.count / pageLimit);
 
-    const users = await new UserModel({ limit: pageLimit, grade }).GetAll();
+    const users = await new UserModel({
+      limit: pageLimit,
+      offset: (page - 1) * pageLimit,
+      grade,
+    }).GetAll();
 
     res.status(200).json({ users, pageNumbers });
   } catch (err) {

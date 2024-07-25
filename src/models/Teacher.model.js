@@ -7,7 +7,7 @@ module.exports = class TeacherModel {
 
   Get() {
     const { teacher } = this;
-    const sql = "SELECT * FROM Teacher WHERE id = ?";
+    const sql = "SELECT username FROM Teacher WHERE id = ?";
 
     return new Promise((resolve, reject) => {
       db.get(sql, [teacher.id], (err, row) => {
@@ -121,6 +121,66 @@ module.exports = class TeacherModel {
     } = ? AND user_id = ?`;
     return new Promise((resolve, reject) => {
       db.run(sql, [teacher.public, teacher.id, teacher.user], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  }
+
+  AddQuestion() {
+    const { teacher } = this;
+    const sql = `INSERT INTO Questions (${
+      teacher.type === "test" ? "test_id" : "homework_id"
+    }, question) VALUES (?, ?)`;
+    new Promise((resolve, reject) => {
+      db.run(sql, [teacher.type_id, teacher.question], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+
+    return new Promise((resolve, reject) => {
+      db.get(
+        `SELECT * FROM Questions WHERE ${
+          teacher.type === "test" ? "test_id" : "homework_id"
+        } = ? ORDER BY id DESC LIMIT 1`,
+        [teacher.type_id],
+        (err, row) => {
+          if (err) reject(err);
+          resolve(row);
+        }
+      );
+    });
+  }
+
+  AddQuestionAnswer() {
+    const { teacher } = this;
+    const sql = `INSERT INTO ${
+      teacher.type === "choices" ? "QuestionChoices" : "QuestionTextAnswers"
+    } (question_id, ${
+      teacher.type === "choices" ? "is_right_choice, the_choice" : "the_answer"
+    }) VALUES (${teacher.type === "choices" ? "?, ?, ?" : "?, ?"})`;
+
+    console.log(teacher);
+
+    const values =
+      teacher.type === "choices"
+        ? [teacher.question_id, teacher.is_right_choice, teacher.the_choice]
+        : [teacher.question_id, teacher.text_answer];
+
+    return new Promise((resolve, reject) => {
+      db.run(sql, [...values], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  }
+
+  DeleteQuestion() {
+    const { teacher } = this;
+    const sql = `DELETE FROM Questions WHERE id = ?`;
+    return new Promise((resolve, reject) => {
+      db.run(sql, [teacher.id], (err) => {
         if (err) reject(err);
         resolve();
       });

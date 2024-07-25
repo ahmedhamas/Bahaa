@@ -50,9 +50,7 @@ const TeacherProfile = async (req, res) => {
 
     const StudentAvgInTests = await TestModel.Average();
     const StudentAvgInHomework = await HomeworkModel.Average();
-    const HighAchievers = await new UserModel({
-      id: tokenData.userId,
-    }).HighAchievers();
+    const HighAchievers = await new UserModel().HighAchievers();
 
     res.status(200).json({
       StudentAvgInTests,
@@ -205,6 +203,73 @@ const Publish = async (req, res) => {
   }
 };
 
+const AddQuestion = async (req, res) => {
+  const tokenData = req.headers["user-id"];
+  const body = req.body;
+  try {
+    const user = await new TeacherModel({ id: tokenData.userId }).Get();
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const result = await new TeacherModel({
+      type: body.type,
+      type_id: body.id,
+      question: body.question,
+    }).AddQuestion();
+
+    if (body.questionType === "text") {
+      const textInputs = body.textInputs.map(async (element) => {
+        return new TeacherModel({
+          question_id: result.id,
+          text_answer: element,
+          type: body.questionType,
+        }).AddQuestionAnswer();
+      });
+
+      await Promise.all(textInputs);
+
+      return res.status(200).json({ message: "ok" });
+    }
+
+    const choicesInputs = body.the_choices.map(async (element) => {
+      return new TeacherModel({
+        question_id: result.id,
+        is_right_choice: element.is_right_choice,
+        the_choice: element.the_choice,
+        text_answer: element.textInputs,
+        type: body.questionType,
+      }).AddQuestionAnswer();
+    });
+
+    await Promise.all(choicesInputs);
+
+    res.status(200).json({ message: "ok" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const DeleteQuestion = async (req, res) => {
+  const tokenData = req.headers["user-id"];
+  const body = req.body;
+  try {
+    const user = await new TeacherModel({ id: tokenData.userId }).Get();
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await new TeacherModel({ id: body.id }).DeleteQuestion();
+    res.status(200).json({ message: "ok" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   TeacherLogin,
   TeacherProfile,
@@ -212,4 +277,6 @@ module.exports = {
   Answers,
   EditAnswers,
   Publish,
+  AddQuestion,
+  DeleteQuestion,
 };

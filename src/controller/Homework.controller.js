@@ -1,5 +1,6 @@
 const UserModel = require("../models/User.model");
 const HomeworkModel = require("../models/Homework.model");
+const TeacherModel = require("../models/Teacher.model");
 const {
   shuffleArray,
   GetAnswersFromArray,
@@ -172,8 +173,144 @@ const SubmitHomework = async (req, res) => {
   }
 };
 
+const GetAll = async (req, res) => {
+  const tokenData = req.headers["user-id"];
+  const { grade_id, page } = req.params;
+  try {
+    let pageLimit = 30;
+
+    const user = await new TeacherModel({ id: tokenData.userId }).Get();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const studentCount = await HomeworkModel.Count();
+
+    const pageNumbers = Math.ceil(studentCount.count / pageLimit);
+
+    const offset = (parseInt(page) - 1) * pageLimit;
+
+    const tests = await new HomeworkModel({
+      grade: parseInt(grade_id),
+      limit: pageLimit,
+      offset: offset,
+    }).GetAll();
+
+    res.status(200).json({ tests: tests, totalPages: pageNumbers });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .send(
+        "Error while fetching Tests Please try again Or contact the Teacher"
+      );
+  }
+};
+
+const Add = async (req, res) => {
+  const tokenData = req.headers["user-id"];
+
+  try {
+    const user = await new TeacherModel({ id: tokenData.userId }).Get();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const test = await new HomeworkModel({
+      homework_name: req.body.homework_name,
+      grade_id: req.body.grade_id,
+      created_at: req.body.created_at,
+      term_id: req.body.term_id,
+    }).Create();
+    res.status(200).json({ test: test });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .send(
+        "Error while fetching Tests Please try again Or contact the Teacher"
+      );
+  }
+};
+
+const Delete = async (req, res) => {
+  const tokenData = req.headers["user-id"];
+  const { id } = req.params;
+  try {
+    const user = await new TeacherModel({ id: tokenData.userId }).Get();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const test = await new HomeworkModel({ id: id }).Delete();
+    res.status(200).json({ test: test });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .send(
+        "Error while fetching Tests Please try again Or contact the Teacher"
+      );
+  }
+};
+
+const GetStudents = async (req, res) => {
+  const tokenData = req.headers["user-id"];
+  const { id } = req.params;
+  try {
+    const user = await new TeacherModel({ id: tokenData.userId }).Get();
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    console.log();
+    const students = await new UserModel({
+      test: id,
+      type: "homework",
+    }).GetStudents();
+
+    res.status(200).json({ students: students });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .send(
+        "Error while fetching Tests Please try again Or contact the Teacher"
+      );
+  }
+};
+
+const GetQuestions = async (req, res) => {
+  const { userId } = req.headers["user-id"];
+  const { id } = req.params;
+
+  try {
+    const user = await new TeacherModel({ id: userId }).Get();
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const questions = await new HomeworkModel({ id }).GetTestQustions();
+
+    res.status(200).json({ questions });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .send(
+        "Error while fetching Tests. Please try again or contact the teacher."
+      );
+  }
+};
+
 module.exports = {
   GradeHomeworks,
   HomeworkQustions,
   SubmitHomework,
+  GetAll,
+  Add,
+  Delete,
+  GetStudents,
+  GetQuestions,
 };
